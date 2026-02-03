@@ -10,6 +10,8 @@ export const ExamDetailPage: React.FC = () => {
   const [showExplanation, setShowExplanation] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [quizStats, setQuizStats] = useState({ correct: 0, total: 0 });
+  const [isQuizSubmitted, setIsQuizSubmitted] = useState(false);
+  const [userAnswers, setUserAnswers] = useState<{ [key: number]: string }>({});
 
   const decodedExamName = examName ? decodeURIComponent(examName) : '';
   const exam = examDatabase[decodedExamName];
@@ -36,6 +38,10 @@ export const ExamDetailPage: React.FC = () => {
   const handleAnswerSelect = (answer: string) => {
     if (!isAnswered) {
       setSelectedAnswer(answer);
+      setUserAnswers((prev) => ({
+        ...prev,
+        [currentQuizIndex]: answer,
+      }));
       setShowExplanation(true);
       if (answer === currentQuiz.correct_answer) {
         setQuizStats((prev) => ({
@@ -73,6 +79,12 @@ export const ExamDetailPage: React.FC = () => {
     setSelectedAnswer(null);
     setShowExplanation(false);
     setQuizStats({ correct: 0, total: 0 });
+    setIsQuizSubmitted(false);
+    setUserAnswers({});
+  };
+
+  const handleSubmitQuiz = () => {
+    setIsQuizSubmitted(true);
   };
 
   return (
@@ -162,100 +174,208 @@ export const ExamDetailPage: React.FC = () => {
         {/* Quizzes Tab */}
         {activeTab === 'quizzes' && (
           <div className="bg-white p-8 rounded-lg shadow-md">
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">
-                  Question {currentQuizIndex + 1} of {exam.quizzes.length}
-                </h2>
-                <span className="text-sm text-gray-600">
-                  Category: <span className="font-semibold">{currentQuiz.category}</span>
-                </span>
-              </div>
+            {!isQuizSubmitted ? (
+              <>
+                <div className="mb-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-2xl font-bold">
+                      Question {currentQuizIndex + 1} of {exam.quizzes.length}
+                    </h2>
+                    <span className="text-sm text-gray-600">
+                      Category: <span className="font-semibold">{currentQuiz.category}</span>
+                    </span>
+                  </div>
 
-              {quizStats.total > 0 && (
-                <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-4">
-                  <p className="text-sm">
-                    Score: <span className="font-bold text-primary-600">{quizStats.correct}/{quizStats.total}</span>
-                  </p>
+                  {quizStats.total > 0 && (
+                    <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-4">
+                      <p className="text-sm">
+                        Score: <span className="font-bold text-primary-600">{quizStats.correct}/{quizStats.total}</span>
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-primary-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${((currentQuizIndex + 1) / exam.quizzes.length) * 100}%` }}
+                    ></div>
+                  </div>
                 </div>
-              )}
 
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-primary-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${((currentQuizIndex + 1) / exam.quizzes.length) * 100}%` }}
-                ></div>
-              </div>
-            </div>
+                <h3 className="text-xl font-semibold mb-6">{currentQuiz.question}</h3>
 
-            <h3 className="text-xl font-semibold mb-6">{currentQuiz.question}</h3>
+                <div className="space-y-3 mb-6">
+                  {currentQuiz.options.map((option) => (
+                    <button
+                      key={option}
+                      onClick={() => handleAnswerSelect(option)}
+                      disabled={isAnswered}
+                      className={`w-full p-4 text-left rounded-lg border-2 transition ${
+                        !isAnswered
+                          ? 'border-gray-200 hover:border-primary-600 cursor-pointer'
+                          : option === currentQuiz.correct_answer
+                          ? 'border-green-500 bg-green-50'
+                          : option === selectedAnswer
+                          ? 'border-red-500 bg-red-50'
+                          : 'border-gray-200 bg-gray-50'
+                      } ${isAnswered ? 'cursor-not-allowed' : ''}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium">{option}</span>
+                        {isAnswered && option === currentQuiz.correct_answer && (
+                          <span className="text-green-600 font-bold">✓</span>
+                        )}
+                        {isAnswered && option === selectedAnswer && option !== currentQuiz.correct_answer && (
+                          <span className="text-red-600 font-bold">✗</span>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
 
-            <div className="space-y-3 mb-6">
-              {currentQuiz.options.map((option) => (
-                <button
-                  key={option}
-                  onClick={() => handleAnswerSelect(option)}
-                  disabled={isAnswered}
-                  className={`w-full p-4 text-left rounded-lg border-2 transition ${
-                    !isAnswered
-                      ? 'border-gray-200 hover:border-primary-600 cursor-pointer'
-                      : option === currentQuiz.correct_answer
-                      ? 'border-green-500 bg-green-50'
-                      : option === selectedAnswer
-                      ? 'border-red-500 bg-red-50'
-                      : 'border-gray-200 bg-gray-50'
-                  } ${isAnswered ? 'cursor-not-allowed' : ''}`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">{option}</span>
-                    {isAnswered && option === currentQuiz.correct_answer && (
-                      <span className="text-green-600 font-bold">✓</span>
+                {showExplanation && (
+                  <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                    <h4 className="font-bold text-blue-900 mb-2">Explanation</h4>
+                    <p className="text-blue-800">{currentQuiz.explanation}</p>
+                    {selectedAnswer === currentQuiz.correct_answer && (
+                      <p className="text-green-700 font-semibold mt-2">✓ Correct!</p>
                     )}
-                    {isAnswered && option === selectedAnswer && option !== currentQuiz.correct_answer && (
-                      <span className="text-red-600 font-bold">✗</span>
+                    {selectedAnswer !== currentQuiz.correct_answer && (
+                      <p className="text-red-700 font-semibold mt-2">✗ Incorrect. The correct answer is: {currentQuiz.correct_answer}</p>
                     )}
                   </div>
-                </button>
-              ))}
-            </div>
+                )}
 
-            {showExplanation && (
-              <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
-                <h4 className="font-bold text-blue-900 mb-2">Explanation</h4>
-                <p className="text-blue-800">{currentQuiz.explanation}</p>
-                {selectedAnswer === currentQuiz.correct_answer && (
-                  <p className="text-green-700 font-semibold mt-2">✓ Correct!</p>
-                )}
-                {selectedAnswer !== currentQuiz.correct_answer && (
-                  <p className="text-red-700 font-semibold mt-2">✗ Incorrect. The correct answer is: {currentQuiz.correct_answer}</p>
-                )}
+                <div className="flex justify-between items-center">
+                  <button
+                    onClick={handlePrevQuestion}
+                    disabled={currentQuizIndex === 0}
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg font-semibold disabled:opacity-50 hover:bg-gray-300 transition"
+                  >
+                    ← Previous
+                  </button>
+
+                  <button
+                    onClick={resetQuiz}
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300 transition"
+                  >
+                    Reset Quiz
+                  </button>
+
+                  {currentQuizIndex === exam.quizzes.length - 1 ? (
+                    <button
+                      onClick={handleSubmitQuiz}
+                      disabled={!isAnswered}
+                      className="px-6 py-2 bg-green-600 text-white rounded-lg font-semibold disabled:opacity-50 hover:bg-green-700 transition"
+                    >
+                      Submit Quiz
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleNextQuestion}
+                      disabled={!isAnswered}
+                      className="px-4 py-2 bg-primary-600 text-white rounded-lg font-semibold disabled:opacity-50 hover:bg-primary-700 transition"
+                    >
+                      Next →
+                    </button>
+                  )}
+                </div>
+              </>
+            ) : (
+              /* Quiz Results Screen */
+              <div className="text-center">
+                <div className="mb-8">
+                  <div className={`inline-flex items-center justify-center w-24 h-24 rounded-full mb-6 ${
+                    (quizStats.correct / exam.quizzes.length) * 100 >= 75
+                      ? 'bg-green-100'
+                      : 'bg-red-100'
+                  }`}>
+                    <span className={`text-5xl font-bold ${
+                      (quizStats.correct / exam.quizzes.length) * 100 >= 75
+                        ? 'text-green-600'
+                        : 'text-red-600'
+                    }`}>
+                      {((quizStats.correct / exam.quizzes.length) * 100).toFixed(1)}%
+                    </span>
+                  </div>
+
+                  <h2 className={`text-4xl font-bold mb-4 ${
+                    (quizStats.correct / exam.quizzes.length) * 100 >= 75
+                      ? 'text-green-600'
+                      : 'text-red-600'
+                  }`}>
+                    {(quizStats.correct / exam.quizzes.length) * 100 >= 75 ? '🎉 PASSED' : '❌ FAILED'}
+                  </h2>
+
+                  <p className="text-2xl font-semibold text-gray-800 mb-2">
+                    Score: {quizStats.correct}/{exam.quizzes.length}
+                  </p>
+                  <p className="text-gray-600">
+                    {(quizStats.correct / exam.quizzes.length) * 100 >= 75
+                      ? 'Great job! You have successfully passed the quiz.'
+                      : 'You need to score at least 75% to pass. Keep practicing!'}
+                  </p>
+                </div>
+
+                {/* Detailed Answer Review */}
+                <div className="mt-12 text-left">
+                  <h3 className="text-2xl font-bold mb-6">Answer Review</h3>
+                  <div className="space-y-6">
+                    {exam.quizzes.map((quiz, idx) => {
+                      const userAnswer = userAnswers[idx];
+                      const isCorrect = userAnswer === quiz.correct_answer;
+
+                      return (
+                        <div key={idx} className={`border-l-4 p-6 rounded-lg ${
+                          isCorrect
+                            ? 'border-green-500 bg-green-50'
+                            : 'border-red-500 bg-red-50'
+                        }`}>
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <p className="font-semibold text-gray-800 mb-2">Question {idx + 1}</p>
+                              <p className="text-gray-700 mb-4">{quiz.question}</p>
+                            </div>
+                            <span className={`text-2xl ml-4 ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
+                              {isCorrect ? '✓' : '✗'}
+                            </span>
+                          </div>
+
+                          <div className="space-y-2 text-sm">
+                            <p className="text-gray-700">
+                              <span className="font-semibold">Your Answer:</span> {userAnswer || 'Not answered'}
+                            </p>
+                            <p className={`font-semibold ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
+                              <span>Correct Answer:</span> {quiz.correct_answer}
+                            </p>
+                            {quiz.explanation && (
+                              <p className="text-gray-700 mt-3">
+                                <span className="font-semibold">Explanation:</span> {quiz.explanation}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="mt-8 flex gap-4 justify-center">
+                  <button
+                    onClick={resetQuiz}
+                    className="px-6 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition"
+                  >
+                    Retake Quiz
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('overview')}
+                    className="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300 transition"
+                  >
+                    Back to Overview
+                  </button>
+                </div>
               </div>
             )}
-
-            <div className="flex justify-between items-center">
-              <button
-                onClick={handlePrevQuestion}
-                disabled={currentQuizIndex === 0}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg font-semibold disabled:opacity-50 hover:bg-gray-300 transition"
-              >
-                ← Previous
-              </button>
-
-              <button
-                onClick={resetQuiz}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300 transition"
-              >
-                Reset Quiz
-              </button>
-
-              <button
-                onClick={handleNextQuestion}
-                disabled={!isAnswered || currentQuizIndex === exam.quizzes.length - 1}
-                className="px-4 py-2 bg-primary-600 text-white rounded-lg font-semibold disabled:opacity-50 hover:bg-primary-700 transition"
-              >
-                Next →
-              </button>
-            </div>
           </div>
         )}
 
