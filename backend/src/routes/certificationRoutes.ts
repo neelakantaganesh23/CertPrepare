@@ -1,7 +1,10 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
+import { PrismaClient } from '@prisma/client';
 import { authMiddleware, requireRole } from '../middleware/auth.js';
+import { successResponse, errorResponse } from '../utils/responses.js';
 
 const router = Router();
+const prisma = new PrismaClient();
 
 /**
  * @swagger
@@ -13,8 +16,17 @@ const router = Router();
  *       200:
  *         description: List of certifications
  */
-router.get('/', (req, res) => {
-  res.json({ message: 'Get certifications - Coming soon' });
+router.get('/', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const certifications = await prisma.certification.findMany({
+      where: { is_active: true },
+      orderBy: { name: 'asc' },
+    });
+    
+    successResponse(res, certifications, 'Certifications retrieved successfully');
+  } catch (error: any) {
+    errorResponse(res, 'Failed to retrieve certifications', 500, error);
+  }
 });
 
 /**
@@ -32,9 +44,32 @@ router.get('/', (req, res) => {
  *     responses:
  *       200:
  *         description: Certification details
+ *       404:
+ *         description: Certification not found
  */
-router.get('/:id', (req, res) => {
-  res.json({ message: 'Get certification by ID - Coming soon' });
+router.get('/:id', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    
+    const certification = await prisma.certification.findUnique({
+      where: { id },
+      include: {
+        topics: {
+          where: { is_active: true },
+          orderBy: { order_index: 'asc' },
+        },
+      },
+    });
+
+    if (!certification) {
+      errorResponse(res, 'Certification not found', 404);
+      return;
+    }
+
+    successResponse(res, certification, 'Certification retrieved successfully');
+  } catch (error: any) {
+    errorResponse(res, 'Failed to retrieve certification', 500, error);
+  }
 });
 
 /**
@@ -68,8 +103,24 @@ router.post(
   '/',
   authMiddleware,
   requireRole('ADMIN'),
-  (req, res) => {
-    res.json({ message: 'Create certification - Coming soon' });
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { name, description, passing_score, duration_minutes, total_questions } = req.body;
+
+      const certification = await prisma.certification.create({
+        data: {
+          name,
+          description,
+          passing_score: passing_score || 70,
+          duration_minutes: duration_minutes || 120,
+          total_questions: total_questions || 50,
+        },
+      });
+
+      successResponse(res, certification, 'Certification created successfully', 201);
+    } catch (error: any) {
+      errorResponse(res, 'Failed to create certification', 500, error);
+    }
   }
 );
 
