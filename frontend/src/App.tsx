@@ -4,8 +4,9 @@ import { Navbar } from '@/components/Navbar';
 import { HomePage } from '@/pages/HomePage';
 import { LoginPage } from '@/pages/LoginPage';
 import { RegisterPage } from '@/pages/RegisterPage';
-import { DashboardPage } from '@/pages/DashboardPage';
 import { ExamDetailPage } from '@/pages/ExamDetailPage';
+import { CertificationProvidersPage } from '@/pages/CertificationProvidersPage';
+import { ProviderExamsPage } from '@/pages/ProviderExamsPage';
 import { useAuthStore } from '@/stores/authStore';
 import { authService } from '@/services/authService';
 import '@/index.css';
@@ -48,7 +49,15 @@ function App() {
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <DashboardPage />
+              <CertificationProvidersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/exams/:provider"
+          element={
+            <ProtectedRoute>
+              <ProviderExamsPage />
             </ProtectedRoute>
           }
         />
