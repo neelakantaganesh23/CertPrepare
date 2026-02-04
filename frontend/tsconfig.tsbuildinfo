@@ -1,1 +1,0 @@
-{"root":["./src/app.tsx","./src/config.ts","./src/main.tsx","./src/components/navbar.tsx","./src/data/examdata.ts","./src/pages/dashboardpage.tsx","./src/pages/examdetailpage.tsx","./src/pages/homepage.tsx","./src/pages/loginpage.tsx","./src/pages/registerpage.tsx","./src/services/api.ts","./src/services/authservice.ts","./src/stores/authstore.ts"],"version":"5.9.3"}
