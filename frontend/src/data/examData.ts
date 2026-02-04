@@ -27,14 +27,32 @@ export interface ExamData {
   name: string;
   provider: string;
   description: string;
+  overview?: {
+    examVersion?: string;
+    totalQuestions?: number;
+    questionTypes?: string;
+    timeLimit?: string;
+    languages?: string;
+    registrationFee?: string;
+    passingScore?: string;
+    prerequisites?: string;
+    deliveryOptions?: string[];
+    domains?: Array<{ name: string; weight: string }>;
+    recommendedResources?: Array<{
+      title: string;
+      url: string;
+      type: string;
+    }>;
+  };
   quizzes: Quiz[];
   dumps?: DumpQuestion[];
   learningMaterials: LearningMaterial[];
-  mockTests: {
+  mockTests: Array<{
+    id: number;
     name: string;
-    questions: number;
+    questionsCount: number;
     duration: number;
-  }[];
+  }>;
 }
 
 export const examDatabase: Record<string, ExamData> = {
@@ -255,26 +273,73 @@ export const examDatabase: Record<string, ExamData> = {
     ],
     mockTests: [
       {
+        id: 1,
         name: 'SnowPro Core Full Mock Test',
-        questions: 100,
+        questionsCount: 100,
         duration: 180,
       },
       {
+        id: 2,
         name: 'Architecture & Warehouse Practice Test',
-        questions: 40,
+        questionsCount: 40,
         duration: 90,
       },
       {
+        id: 3,
         name: 'Data Loading & Protection Practice Test',
-        questions: 35,
+        questionsCount: 35,
         duration: 75,
       },
     ],
   },
   'SnowPro Specialty: Gen AI': {
-    name: 'SnowPro Specialty: Gen AI',
+    name: 'SnowPro® Specialty: Gen AI',
     provider: 'Snowflake',
-    description: 'Specialty Certification - LLMs, Cortex, and generative workflows within Snowflake',
+    description: 'The SnowPro® Specialty: Gen AI Certification Exam will validate specialized knowledge, skills, and best practices used to leverage Gen AI methodologies in Snowflake including key concepts, features, and programming constructs.',
+    overview: {
+      examVersion: 'GES-C01',
+      totalQuestions: 55,
+      questionTypes: 'Multiple Select, Multiple Choice, Interactive',
+      timeLimit: '85 minutes',
+      languages: 'English',
+      registrationFee: '$225 USD (India: $180 USD)',
+      passingScore: '750+ (Scaled Scoring 0-1000)',
+      prerequisites: 'SnowPro Core Certification or SnowPro Associate: Platform Certification',
+      deliveryOptions: ['Online Proctoring', 'Onsite Testing Centers'],
+      domains: [
+        { name: 'Snowflake for Gen AI Overview', weight: '26%' },
+        { name: 'Snowflake Gen AI & LLM Functions', weight: '40%' },
+        { name: 'Snowflake Gen AI Governance', weight: '22%' },
+        { name: 'Snowflake Document AI', weight: '12%' },
+      ],
+      recommendedResources: [
+        {
+          title: 'Official Snowflake Documentation',
+          url: 'https://docs.snowflake.com/en/guides-overview-ai-features',
+          type: 'documentation',
+        },
+        {
+          title: 'SnowPro Gen AI Study Guide',
+          url: 'https://www.snowflake.com/wp-content/uploads/2024/11/standard_genai_datasheet_24J23.pdf',
+          type: 'pdf',
+        },
+        {
+          title: 'Medium Blog: How I Passed the SnowPro Specialty Gen AI Certification',
+          url: 'https://cristian-70480.medium.com/how-i-passed-the-snowpro-specialty-gen-ai-certification-exam-80307d7786a5',
+          type: 'article',
+        },
+        {
+          title: 'YouTube Tutorial',
+          url: 'https://youtu.be/9HsQX_vigYM?si=Gj1QHlqEmG5VxJdD',
+          type: 'video',
+        },
+        {
+          title: 'Udemy Practice Tests',
+          url: 'https://www.udemy.com/course/practice-tests-for-the-snowpro-gen-ai-specialist-exam-j/',
+          type: 'course',
+        },
+      ],
+    },
     quizzes: [
       {
         id: 1,
@@ -410,6 +475,258 @@ export const examDatabase: Record<string, ExamData> = {
         correct_answer: 'Per token usage by the model',
         explanation:
           'Snowflake Cortex LLM functions billing is based on token usage - both input and output tokens are counted and billed according to the specific model used.',
+      },
+      {
+        id: 11,
+        category: 'Cortex Functions',
+        question: 'A data application developer is configuring inference with a newly fine-tuned llama3.1-70b model via AI_COMPLETE and expects structured JSON output. Which of the following statements accurately describes how to configure this inference?',
+        options: [
+          'Basic LLM configuration without structured output support',
+          'Using response_format parameter with JSON schema validation',
+          'Structured outputs only available for specific models',
+          'No limitations on JSON schema complexity',
+          'Multiple model support with consistent structured output',
+        ],
+        correct_answer: 'Using response_format parameter with JSON schema validation',
+        explanation: 'Snowflake Cortex supports structured outputs through the response_format parameter, allowing configuration of JSON schemas for inference results.',
+      },
+      {
+        id: 12,
+        category: 'Data Governance',
+        question: 'A data analyst is using Snowflake Copilot in Snowsight to generate SQL queries for a new dataset containing customer PII. How does Snowflake Copilot operate with respect to data access and governance?',
+        options: [
+          'Copilot transmits sampled PII data to external LLMs',
+          'Copilot accesses raw data directly from customer tables',
+          'Copilot runs securely inside Cortex and uses only metadata without accessing raw data',
+          'Copilot requires explicit column-level grants for data access',
+          'Copilot stores PII data temporarily for performance optimization',
+        ],
+        correct_answer: 'Copilot runs securely inside Cortex and uses only metadata without accessing raw data',
+        explanation: 'Snowflake Copilot is powered by a fine-tuned model running inside Cortex, leveraging only metadata (database/schema/table/column names and data types), ensuring data remains within Snowflake\'s governance boundary and respects RBAC.',
+      },
+      {
+        id: 13,
+        category: 'Model Registry',
+        question: 'A data engineering team wants to deploy a proprietary PyCaret classification model for inference within Snowpark Container Services (SPCS). Which is a correct step in registering this custom model in the Snowflake Model Registry?',
+        options: [
+          'Register the model directly without serialization',
+          'Convert the model to a specific format before registration',
+          'Create a compute pool before model registration',
+          'Use Model Registry with proper metadata and model artifacts',
+          'Store model weights in a separate location',
+        ],
+        correct_answer: 'Use Model Registry with proper metadata and model artifacts',
+        explanation: 'The Snowflake Model Registry requires proper model artifacts and metadata to register custom models for deployment within SPCS.',
+      },
+      {
+        id: 14,
+        category: 'Cost Optimization',
+        question: 'A data scientist is leveraging Snowflake Cortex LLM functions to process extensive text data. To manage their budget effectively, which statement accurately describes how costs are incurred?',
+        options: [
+          'Costs are based on the number of queries executed',
+          'Costs are calculated based on token usage by each function',
+          'Costs depend on the warehouse size used',
+          'Costs are fixed regardless of data volume',
+          'Costs are per user account per month',
+        ],
+        correct_answer: 'Costs are calculated based on token usage by each function',
+        explanation: 'Snowflake Cortex LLM functions are billed based on token consumption. Both input and output tokens are counted, with costs varying by model and usage volume.',
+      },
+      {
+        id: 15,
+        category: 'Structured Outputs',
+        question: 'A Snowflake developer is tasked with enhancing a daily data pipeline to extract structured information from system event descriptions into strict JSON format. Which approach best ensures structured JSON output with defined fields?',
+        options: [
+          'Use COMPLETE without structured output specification',
+          'Use COMPLETE with response_format for JSON schema definition',
+          'Use EXTRACT_ANSWER with manual JSON parsing',
+          'Use TRY_COMPLETE for error handling of extraction',
+          'Implement post-processing for JSON structure validation',
+        ],
+        correct_answer: 'Use COMPLETE with response_format for JSON schema definition',
+        explanation: 'COMPLETE with response_format parameter is the most effective approach to guarantee structured JSON output with defined fields and data types, ensuring data quality for downstream analytics.',
+      },
+      {
+        id: 16,
+        category: 'Access Control',
+        question: 'A Snowflake administrator needs to implement granular access control for LLMs with an account-level allowlist for select models and a specific team requiring additional model access. Which approach correctly establishes this strategy?',
+        options: [
+          'Configure CORTEX_MODELS_ALLOWLIST only at account level',
+          'Use only SNOWFLAKE.CORTEX_USER role for all users',
+          'Combine CORTEX_MODELS_ALLOWLIST with model-specific CORTEX_MODEL_ROLE grants',
+          'Grant all Cortex models to all users',
+          'Restrict access through warehouse-level policies',
+        ],
+        correct_answer: 'Combine CORTEX_MODELS_ALLOWLIST with model-specific CORTEX_MODEL_ROLE grants',
+        explanation: 'Proper LLM access control combines account-level allowlist configuration with model-specific role grants, enabling both broad access and targeted permissions.',
+      },
+      {
+        id: 17,
+        category: 'Vector Embeddings',
+        question: 'A data scientist needs to generate vector embeddings for product descriptions using the e5-base-v2 model. Which SQL function is appropriate for this task?',
+        options: [
+          'SNOWFLAKE.CORTEX.COMPLETE',
+          'SNOWFLAKE.CORTEX.EMBED_TEXT_768',
+          'SNOWFLAKE.CORTEX.SUMMARIZE',
+          'SNOWFLAKE.CORTEX.TRANSLATE',
+          'SNOWFLAKE.CORTEX.CLASSIFY_TEXT',
+        ],
+        correct_answer: 'SNOWFLAKE.CORTEX.EMBED_TEXT_768',
+        explanation: 'The EMBED_TEXT_768 function generates vector embeddings for text data, suitable for semantic search, similarity comparisons, and RAG applications.',
+      },
+      {
+        id: 18,
+        category: 'Document AI',
+        question: 'A data science team is fine-tuning a Snowflake Document AI model to improve extraction accuracy for complex legal documents. Which practice should the team follow to most effectively improve accuracy?',
+        options: [
+          'Prioritize extensive prompt engineering with intricate logic',
+          'Limit training data exclusively to perfectly formatted documents',
+          'Set temperature parameter to high value for creative interpretations',
+          'Ensure training dataset includes diverse documents with expert annotations',
+          'Use only automated annotation without human review',
+        ],
+        correct_answer: 'Ensure training dataset includes diverse documents with expert annotations',
+        explanation: 'Fine-tuning effectiveness improves with diverse training datasets representing various document layouts and explicit expert annotations, helping the model learn complex extraction patterns.',
+      },
+      {
+        id: 19,
+        category: 'Cortex Analyst',
+        question: 'A data engineering team is deploying Snowflake Cortex Analyst for natural language queries over structured sales data. Which practice should be implemented to maximize accuracy?',
+        options: [
+          'Include all available tables and columns in the semantic model',
+          'Define semantic models with only the most common columns',
+          'Create a semantic model with relevant dimensions, facts, and synonyms for improved natural language understanding',
+          'Use raw table names without business-friendly aliases',
+          'Avoid defining relationships between tables',
+        ],
+        correct_answer: 'Create a semantic model with relevant dimensions, facts, and synonyms for improved natural language understanding',
+        explanation: 'Effective Cortex Analyst deployment requires semantic models with well-defined dimensions, facts, and synonyms that map business terms to technical columns, improving natural language understanding.',
+      },
+      {
+        id: 20,
+        category: 'Document Processing',
+        question: 'A data engineering team implementing Document AI solution needs to execute the PREDICT method on staged vendor invoices. Which privilege is essential for successful execution?',
+        options: [
+          'USAGE privilege on the Document AI model',
+          'USAGE privilege on the invoice_processing_schema',
+          'READ privilege on the raw_invoices_stage',
+          'All of the above',
+          'Only CREATE privilege on the schema',
+        ],
+        correct_answer: 'All of the above',
+        explanation: 'Document AI PREDICT method requires multiple privileges: USAGE on the model, USAGE on the schema, and READ on the stage, along with the SNOWFLAKE.DOCUMENT_INTELLIGENCE_CREATOR role.',
+      },
+      {
+        id: 21,
+        category: 'Vector Functions',
+        question: 'A data engineer is building a product recommendation system using VECTOR_COSINE_SIMILARITY on pre-computed embeddings. Which statement is TRUE regarding the VECTOR data type?',
+        options: [
+          'Maximum dimensions supported is 8,192',
+          'Maximum dimensions supported is 65,536',
+          'VECTOR can be used as primary key in regular tables',
+          'VECTOR data type cannot be indexed',
+          'All dimensions must be identical across all vectors in a column',
+        ],
+        correct_answer: 'Maximum dimensions supported is 65,536',
+        explanation: 'Snowflake VECTOR data type supports up to 65,536 dimensions. VECTOR_COSINE_SIMILARITY returns values between -1 and 1, indicating the similarity of two vectors.',
+      },
+      {
+        id: 22,
+        category: 'Access Control',
+        question: 'An administrator has configured CORTEX_MODELS_ALLOWLIST to permit only mistral-large model. A user with SNOWFLAKE.CORTEX_USER role attempts to execute COMPLETE queries with various models. Which queries will execute successfully?',
+        options: [
+          'Only queries using mistral-large model',
+          'Only queries using llama3.1-70b model',
+          'Queries using any Cortex model',
+          'All COMPLETE queries regardless of model',
+          'No queries will execute due to role conflicts',
+        ],
+        correct_answer: 'Only queries using mistral-large model',
+        explanation: 'When CORTEX_MODELS_ALLOWLIST is configured, only models in the allowlist are permitted, regardless of individual role grants. This provides account-level governance.',
+      },
+      {
+        id: 23,
+        category: 'Text Processing',
+        question: 'A financial institution wants to process call transcripts: summarize lengthy calls (up to 20,000 tokens) and classify sentiment. Which Cortex functions are most appropriate?',
+        options: [
+          'Use SUMMARIZE for both tasks',
+          'Use COMPLETE for both tasks',
+          'Use SUMMARIZE for transcripts and COMPLETE with response_format for sentiment classification',
+          'Use TRANSLATE for both tasks',
+          'Manual processing without Cortex functions',
+        ],
+        correct_answer: 'Use SUMMARIZE for transcripts and COMPLETE with response_format for sentiment classification',
+        explanation: 'SUMMARIZE efficiently handles long transcripts, while COMPLETE with structured outputs (response_format) is ideal for classification tasks like sentiment analysis.',
+      },
+      {
+        id: 24,
+        category: 'Performance Optimization',
+        question: 'An engineering team is building an analytics pipeline comparing 512-dimensional customer activity vectors using VECTOR_L2_DISTANCE. Which best practice should be considered?',
+        options: [
+          'Always use the smallest warehouse size for cost savings',
+          'Use X-Large or larger warehouses for all vector operations',
+          'Use appropriately-sized warehouses following Cortex function recommendations',
+          'Warehouse size has no impact on vector similarity performance',
+          'Always use auto-scaling for vector queries',
+        ],
+        correct_answer: 'Use appropriately-sized warehouses following Cortex function recommendations',
+        explanation: 'Snowflake recommends using appropriately-sized warehouses (typically MEDIUM or smaller, not oversized) for Cortex AI and vector similarity functions for optimal performance and cost efficiency.',
+      },
+      {
+        id: 25,
+        category: 'Cost and Governance',
+        question: 'An operations manager is monitoring Cortex Analyst REST API deployment for cost and compliance. Which statement correctly describes cost calculation?',
+        options: [
+          'Credit consumption is flat rate per API call',
+          'Cost is based on tokens processed by underlying LLMs',
+          'Cost is 67 Credits per 1,000 messages processed',
+          'Cost varies only by user count',
+          'All Cortex Analyst usage is free with subscriptions',
+        ],
+        correct_answer: 'Cost is based on tokens processed by underlying LLMs',
+        explanation: 'Cortex Analyst cost is primarily based on token usage by underlying LLMs. More complex natural language queries lead to higher token usage and costs.',
+      },
+      {
+        id: 26,
+        category: 'Conversational AI',
+        question: 'A developer is using SNOWFLAKE.CORTEX.COMPLETE for a multi-turn conversation app. They want creative responses, controlled length, JSON structure, and safety filtering. Which parameter is critical for JSON structure?',
+        options: [
+          'temperature parameter',
+          'max_tokens parameter',
+          'response_format parameter',
+          'top_p parameter',
+          'stop_sequences parameter',
+        ],
+        correct_answer: 'response_format parameter',
+        explanation: 'The response_format parameter ensures structured JSON output with defined schema. Temperature controls creativity, max_tokens controls length, and messages parameter maintains conversation history.',
+      },
+      {
+        id: 27,
+        category: 'RAG Applications',
+        question: 'A developer is building a RAG pipeline using Cortex Search and COMPLETE function. Which is crucial for effective multi-turn RAG chatbots?',
+        options: [
+          'Query Cortex Search and LLM in single SQL statement',
+          'Pass all previous user prompts and model responses in messages parameter',
+          'Store conversation history in separate Snowflake tables',
+          'Use TRY_COMPLETE to handle retrieval failures',
+          'Concatenate retrieved context directly without formatting',
+        ],
+        correct_answer: 'Pass all previous user prompts and model responses in messages parameter',
+        explanation: 'For multi-turn RAG chatbots, maintaining conversation context by passing previous prompts and responses in the messages parameter is crucial for coherent and contextual responses.',
+      },
+      {
+        id: 28,
+        category: 'Text Chunking',
+        question: 'A team is preparing unstructured data for a RAG application involving text extraction, chunking, embedding, and Cortex Search indexing. Where does SNOWFLAKE.CORTEX.SPLIT_TEXT_RECURSIVE_CHARACTER fit in the pipeline?',
+        options: [
+          'Post-processing step for LLM-generated responses',
+          'Replaces manual text chunking entirely',
+          'Input for text embedding functions to convert chunks into vectors',
+          'Automatically detects factual inconsistencies',
+          'Applied after embedding for semantic indexing',
+        ],
+        correct_answer: 'Input for text embedding functions to convert chunks into vectors',
+        explanation: 'SPLIT_TEXT_RECURSIVE_CHARACTER divides large documents into smaller chunks that serve as direct input for embedding functions, converting them into vector representations for semantic indexing in Cortex Search.',
       },
     ],
     dumps: [
@@ -781,66 +1098,119 @@ export const examDatabase: Record<string, ExamData> = {
     learningMaterials: [
       {
         id: 1,
-        title: 'Snowflake AI and ML Overview',
+        title: 'Official Snowflake AI Features Documentation',
         type: 'documentation',
         url: 'https://docs.snowflake.com/en/guides-overview-ai-features',
-        description: 'Complete guide to Snowflake AI Features and ML capabilities',
+        description: 'Complete guide to Snowflake AI Features and ML capabilities - Official reference',
       },
       {
         id: 2,
-        title: 'Snowflake Cortex Features',
+        title: 'Snowflake Cortex: AI SQL Functions',
         type: 'documentation',
         url: 'https://docs.snowflake.com/en/user-guide/snowflake-cortex/aisql',
-        description: 'AI SQL functions and LLM capabilities in Snowflake Cortex',
+        description: 'Complete reference for Cortex LLM functions, embedding models, and AI capabilities',
       },
       {
         id: 3,
-        title: 'Cortex Search Service',
+        title: 'Cortex Search Service Guide',
         type: 'documentation',
         url: 'https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-search/cortex-search-overview',
-        description: 'Semantic search and RAG implementation with Cortex Search',
+        description: 'Semantic search and RAG (Retrieval Augmented Generation) implementation',
       },
       {
         id: 4,
-        title: 'Cortex Analyst Semantic Models',
+        title: 'Cortex Analyst: Semantic Models',
         type: 'documentation',
         url: 'https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-analyst',
-        description: 'Building semantic models for natural language queries',
+        description: 'Building semantic models for natural language queries and BI integration',
       },
       {
         id: 5,
-        title: 'Document AI and Extraction',
+        title: 'Document AI: Extraction & Processing',
         type: 'documentation',
         url: 'https://docs.snowflake.com/en/user-guide/snowflake-cortex/document-ai',
-        description: 'Automated document processing and information extraction',
+        description: 'Automated document processing, information extraction, and parsing',
       },
       {
         id: 6,
-        title: 'SnowPro Specialty: Gen AI Study Guide',
+        title: 'GES-C01 Actual Exam Questions Database',
         type: 'article',
-        url: 'https://www.snowflake.com/wp-content/uploads/2024/11/standard_genai_datasheet_24J23.pdf',
-        description: 'Official Snowflake Gen AI certification study guide',
+        url: 'https://www.actual4test.com/exam/GES-C01-questions',
+        description: 'Real GES-C01 exam questions (351+ questions) with verified answers and explanations',
+      },
+      {
+        id: 7,
+        title: 'Certified Exam Dumps & Practice Tests',
+        type: 'article',
+        url: 'https://freedumps.certqueen.com/ges-c01-exam-dumps-snowpro-specialty-gen-ai-certification/',
+        description: 'Free GES-C01 exam dumps with Q&A format and detailed explanations',
+      },
+      {
+        id: 8,
+        title: 'Valid IT Exam Dumps - GES-C01 (V8.02)',
+        type: 'article',
+        url: 'https://www.dumpsbase.com/freedumps/real-ges-c01-dumps-v8-02-for-the-snowpro-specialty-gen-ai-certification-exam-preparation-check-ges-c01-free-dumps-part-1-q1-q40-first.html',
+        description: 'Latest GES-C01 V8.02 exam dumps with verified questions (Parts 1-3, Q1-Q100+)',
+      },
+      {
+        id: 9,
+        title: 'FreeCram GES-C01 Exam Questions',
+        type: 'article',
+        url: 'https://www.freecram.com/Snowflake-certification/GES-C01-exam-questions.html',
+        description: 'Free GES-C01 exam questions collection with detailed answers',
+      },
+      {
+        id: 10,
+        title: 'BrainDumpsStudy GES-C01 Exam Dumps',
+        type: 'article',
+        url: 'https://www.braindumpstudy.com/snowpro-specialty-gen-ai-certification-exam-dumps17517.html',
+        description: 'Comprehensive GES-C01 exam dumps with real-world scenarios',
+      },
+      {
+        id: 11,
+        title: 'GES-C01 Gen AI Specialty Complete Study Guide',
+        type: 'article',
+        url: 'https://studylib.net/doc/27990087/ges-c01---gen-ai-specialty---complete-exam-preparation-guide',
+        description: 'Complete exam preparation guide covering all GES-C01 domains',
+      },
+      {
+        id: 12,
+        title: 'SnowPro Specialty: Gen AI Study Resources',
+        type: 'article',
+        url: 'https://www.scribd.com/document/924495989/Snow-Pro-Gena-i-Study-Guide',
+        description: 'Study guide for SnowPro Gen AI specialty certification',
+      },
+      {
+        id: 13,
+        title: 'Google Books: Gen AI Architecture Patterns',
+        type: 'article',
+        url: 'https://books.google.co.in/books?id=5mR0EQAAQBAJ&pg=PA58&source=gbs_toc_r&cad=2#v=onepage&q&f=false',
+        description: 'Reference material on GenAI architecture patterns and best practices',
       },
     ],
     mockTests: [
       {
+        id: 1,
         name: 'GES-C01 Full Mock Exam',
-        questions: 130,
+        questionsCount: 130,
         duration: 180,
       },
       {
+        id: 2,
         name: 'Cortex Functions & Search Practice',
-        questions: 50,
+        questionsCount: 50,
         duration: 90,
       },
       {
+        id: 3,
         name: 'Cortex Analyst & Document AI Practice',
-        questions: 45,
+        questionsCount: 45,
         duration: 75,
       },
       {
+        id: 4,
         name: 'Access Control & Security Practice',
-        questions: 35,
+        questionsCount: 35,
         duration: 60,
       },
     ],

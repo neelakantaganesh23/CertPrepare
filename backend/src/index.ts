@@ -8,6 +8,7 @@ import { requestLogger } from './middleware/logger.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import authRoutes from './routes/authRoutes.js';
 import certificationRoutes from './routes/certificationRoutes.js';
+import examRoutes from './routes/examRoutes.js';
 
 const app = express();
 
@@ -68,6 +69,7 @@ app.get('/health', (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/certifications', certificationRoutes);
+app.use('/api/exams', examRoutes);
 
 // 404 handler
 app.use(notFoundHandler);

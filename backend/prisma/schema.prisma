@@ -32,6 +32,9 @@ model User {
   notes                StudyNote[]
   flashcards           Flashcard[]
   flashcard_reviews    FlashcardReview[]
+  quiz_attempts        QuizAttempt[]
+  quiz_submissions     QuizSubmission[]
+  mock_exam_attempts   MockExamAttempt[]
 
   @@index([email])
   @@index([role])
@@ -51,6 +54,12 @@ model Certification {
   // Relations
   topics            Topic[]
   user_progress     UserProgress[]
+  study_materials   StudyMaterial[]
+  exam_questions    ExamQuestion[]
+  quiz_attempts     QuizAttempt[]
+  quiz_submissions  QuizSubmission[]
+  exam_dumps        ExamDump[]
+  mock_exams        MockExam[]
 
   @@index([is_active])
 }
@@ -234,4 +243,172 @@ model FlashcardReview {
   @@index([flashcard_id])
   @@index([user_id])
   @@index([reviewed_at])
+}
+model StudyMaterial {
+  id                String   @id @default(cuid())
+  certification_id  String
+  title             String
+  description       String?
+  url               String
+  type              String   @default("DOCUMENTATION") // DOCUMENTATION, BLOG, VIDEO, COURSE
+  category          String?  // Topic category this material covers
+  is_active         Boolean  @default(true)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  certification     Certification @relation(fields: [certification_id], references: [id], onDelete: Cascade)
+
+  @@index([certification_id])
+  @@index([type])
+}
+
+model ExamQuestion {
+  id                String   @id @default(cuid())
+  certification_id  String
+  question_text     String
+  question_type     String   @default("MULTIPLE_CHOICE") // MULTIPLE_CHOICE, ESSAY, TRUE_FALSE
+  difficulty        String   @default("MEDIUM")
+  explanation       String?
+  is_active         Boolean  @default(true)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  certification     Certification  @relation(fields: [certification_id], references: [id], onDelete: Cascade)
+  options           QuestionOption[]
+  quiz_attempts     QuizAttempt[]
+
+  @@index([certification_id])
+  @@index([difficulty])
+}
+
+model QuestionOption {
+  id                String   @id @default(cuid())
+  question_id       String
+  option_text       String
+  is_correct        Boolean  @default(false)
+  order_index       Int      @default(0)
+  created_at        DateTime @default(now())
+
+  question          ExamQuestion @relation(fields: [question_id], references: [id], onDelete: Cascade)
+
+  @@index([question_id])
+}
+
+model QuizAttempt {
+  id                String   @id @default(cuid())
+  user_id           String
+  certification_id  String
+  question_id       String
+  selected_option_id String?
+  is_correct        Boolean?
+  time_spent_seconds Int      @default(0)
+  created_at        DateTime @default(now())
+
+  user              User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  certification     Certification @relation(fields: [certification_id], references: [id], onDelete: Cascade)
+  question          ExamQuestion  @relation(fields: [question_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([certification_id])
+}
+
+model QuizSubmission {
+  id                String   @id @default(cuid())
+  user_id           String
+  certification_id  String
+  total_questions   Int
+  correct_answers   Int
+  score             Float
+  passed            Boolean
+  submitted_at      DateTime @default(now())
+  created_at        DateTime @default(now())
+
+  user              User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  certification     Certification @relation(fields: [certification_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([certification_id])
+}
+
+model ExamDump {
+  id                String   @id @default(cuid())
+  certification_id  String
+  title             String
+  description       String?
+  source_url        String?
+  difficulty        String   @default("MEDIUM")
+  is_active         Boolean  @default(true)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  certification     Certification @relation(fields: [certification_id], references: [id], onDelete: Cascade)
+  dump_questions    DumpQuestion[]
+
+  @@index([certification_id])
+}
+
+model DumpQuestion {
+  id                String   @id @default(cuid())
+  dump_id           String
+  question_text     String
+  explanation       String?
+  source            String?  // Source website or certified user
+  created_at        DateTime @default(now())
+
+  dump              ExamDump @relation(fields: [dump_id], references: [id], onDelete: Cascade)
+
+  @@index([dump_id])
+}
+
+model MockExam {
+  id                String   @id @default(cuid())
+  certification_id  String
+  title             String
+  description       String?
+  duration_minutes  Int      @default(120)
+  total_questions   Int      @default(50)
+  passing_score     Int      @default(70)
+  is_active         Boolean  @default(true)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  certification     Certification      @relation(fields: [certification_id], references: [id], onDelete: Cascade)
+  mock_attempts     MockExamAttempt[]
+
+  @@index([certification_id])
+}
+
+model MockExamAttempt {
+  id                String   @id @default(cuid())
+  user_id           String
+  mock_exam_id      String
+  started_at        DateTime @default(now())
+  completed_at      DateTime?
+  total_questions   Int
+  correct_answers   Int
+  score             Float?
+  passed            Boolean?
+  time_taken_seconds Int?
+  created_at        DateTime @default(now())
+
+  user              User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  mock_exam         MockExam     @relation(fields: [mock_exam_id], references: [id], onDelete: Cascade)
+  answers           MockExamAnswer[]
+
+  @@index([user_id])
+  @@index([mock_exam_id])
+}
+
+model MockExamAnswer {
+  id                String   @id @default(cuid())
+  attempt_id        String
+  question_id       String
+  selected_answer   String?
+  is_correct        Boolean?
+  time_spent_seconds Int      @default(0)
+
+  attempt           MockExamAttempt @relation(fields: [attempt_id], references: [id], onDelete: Cascade)
+
+  @@unique([attempt_id, question_id])
+  @@index([attempt_id])
 }
