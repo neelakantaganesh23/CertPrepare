@@ -16,6 +16,9 @@ export const ExamDetailPage: React.FC = () => {
   const decodedExamName = examName ? decodeURIComponent(examName) : '';
   const exam = examDatabase[decodedExamName];
 
+  // Get provider from exam data
+  const provider = exam?.provider;
+
   if (!exam) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -93,11 +96,11 @@ export const ExamDetailPage: React.FC = () => {
       <div className="bg-primary-600 text-white">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <button
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate(provider ? `/exams/${provider}` : '/dashboard')}
             className="flex items-center gap-2 mb-4 hover:opacity-80 transition"
           >
             <span>←</span>
-            <span>Back to Dashboard</span>
+            <span>Back to Exams</span>
           </button>
           <h1 className="text-4xl font-bold mb-2">{exam.name}</h1>
           <p className="text-primary-100">{exam.description}</p>
